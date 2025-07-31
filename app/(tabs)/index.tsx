@@ -1,75 +1,199 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useState } from 'react'; 
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 
 export default function HomeScreen() {
+  const [password, setPassword] = useState('');
+  const [bgColor, setBgColor] = useState('#7d7f9aff'); // initial color
+  const [showBtnMode, setShowBtnMode] = useState(true);
+  const [showBtnMode2, setShowBtnMode2] = useState(false);
+
+  const num = [1, 2, 3, 4, 5, 6, 7, 9, 0];
+  const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                   'n','o','p','q','r','s','t','u','v','w','x','y','z'];
+  const caracters = ['!', '@', '#', '%', '&', '.'];
+  const text = [...num, ...letters, ...caracters];
+
+  const generatePassword = (length = 15) => {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * text.length);
+      result += text[randomIndex];
+    }
+    return result;
+  };
+
+  const handleGeneratePress = () => {
+    const newPassword = generatePassword();
+    setPassword(newPassword);
+  };
+
+  const handleBtnModePress = () => {
+    setBgColor('#121212');  // dark mode
+    setShowBtnMode(false);
+    setShowBtnMode2(true);
+  };
+
+  const handleBtnMode2Press = () => {
+    setBgColor('#7d7f9aff'); // original light color
+    setShowBtnMode(true);
+    setShowBtnMode2(false);
+  };
+
+  // This function copies the password to clipboard
+  const handleCopyPress = () => {
+    if (password) {
+      Clipboard.setString(password);
+      
+    } else {
+      Alert.alert('Nothing to copy', 'Please generate a password first.');
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
+      <Text style={styles.text}>Password Generator</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Generated password appears here"
+        placeholderTextColor="#ccc"
+        value={password}
+        editable={false}
+      />
+
+      <TouchableOpacity style={styles.btngen} onPress={handleGeneratePress}>
+        <Text style={styles.btngenText}>Generate</Text>
+      </TouchableOpacity>
+
+      {showBtnMode && (
+        <TouchableOpacity style={styles.btnmode} onPress={handleBtnModePress}>
+          <Image
+            source={require('../../assets/images/night-mode.png')}
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+      )}
+
+      {showBtnMode2 && (
+        <TouchableOpacity style={styles.btnmode2} onPress={handleBtnMode2Press}>
+          <Image
+            source={require('../../assets/images/brightness (1).png')}
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+      )}
+
+      {/* COPY BUTTON */}
+      <TouchableOpacity style={styles.btncopy} onPress={handleCopyPress}>
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={require('../../assets/images/copy.png')}
+          style={styles.icon}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </TouchableOpacity>
+      <Text style={styles.copyright}>Developed by Armando Mabunda Júnior</Text>
+    </View>
   );
 }
 
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: { flex: 1, padding: 20 },
+  text: {
+    fontSize: 28,
+    textAlign: 'left',
+    fontWeight: 'bold',
+    marginTop: 20,
+    color:'blue',
+  },
+  input: {
+    width: '80%',
+    height: 50,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingLeft: 20,
+    fontSize: 25,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginTop: 100,
+  },
+  btngen: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#000000',
+    borderRadius: 10,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    marginTop: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  btngenText: {
+    color: '#ffffff',
+    fontSize: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+ btnmode: {
+  width: 35,
+  height: 35,
+  borderRadius: 10,
+  backgroundColor: 'white',
+  position: 'absolute',      // position absolutely
+  top: 45,                  // adjust top position as needed
+  right: 30,                // adjust right position as needed
+  justifyContent: 'center', // center icon vertically
+  alignItems: 'center',     // center icon horizontally
+  elevation: 3,             // optional: shadow for Android
+  shadowColor: '#000',      // optional: shadow for iOS
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.2,
+  shadowRadius: 1.5,
+},
+
+btnmode2: {
+  width: 35,
+  height: 35,
+  borderRadius: 10,
+  backgroundColor: 'white',
+  position: 'absolute',
+top: 45,                  // adjust top position as needed
+  right: 30, 
+  justifyContent: 'center',
+  alignItems: 'center',
+  elevation: 3,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.2,
+  shadowRadius: 1.5,
+},
+
+icon: {
+  width: 25,
+  height: 25,
+  resizeMode: 'contain',
+},
+btncopy:{
+ width: 50,
+  height: 50,
+  borderRadius: 10,
+  backgroundColor: 'white',
+  position: 'absolute',      // position absolutely
+  top: 178,                  // adjust top position as needed
+  right: 30,                // adjust right position as needed
+  justifyContent: 'center', // center icon vertically
+  alignItems: 'center',     // center icon horizontally
+  elevation: 3,             // optional: shadow for Android
+  shadowColor: '#000',      // optional: shadow for iOS
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.2,
+  shadowRadius: 1.5,
+
+},
+
+copyright:{
+
+  position: 'absolute',
+  top: 645,                  // adjust top position as needed
+  right: 50, 
+  fontSize:15,
+  textAlign:'center',
+  fontStyle:'italic'
+}
 });
